@@ -18,24 +18,20 @@
 
 ## 📌 Overview
 
-Offline OpenVPN / WireGuard / IPsec configuration auditor
+
+OVpnAudit is an offline, read-only VPN server configuration auditor for OpenVPN and WireGuard that parses .conf/.ovpn files and server directives with stdlib-only parsers. It evaluates cipher and TLS strength, authentication and certificate settings, key/secret file permissions, and insecure options such as client-to-client or disabled TLS auth. Secrets are masked, findings are mapped to CWE and MITRE ATT&CK, and reports export to TXT, Markdown, JSON, CSV or SARIF.
 
 ---
 
 ## ✨ Features
 
-- OpenVPN server/client parser (.conf / .ovpn) with inline-block (<ca>/<key>/<tls-crypt>) awareness
-- OpenVPN checks — cipher / data-ciphers / auth digest, tls-version-min, tls-auth / tls-crypt, VORACLE compression, client-to-client, duplicate-cn, script-security 3, privilege drop, verify-x509-name, remote-cert-tls, static keys, management socket ...
-- WireGuard parser — AllowedIPs on servers, missing PresharedKey, key file permissions, PostUp/PostDown shell hooks, duplicate / self public keys, overlaps
-- Pure-python X25519 — derives WireGuard public keys from private keys to catch key reuse across files
-- strongSwan ipsec.conf / swanctl.conf + libreswan — IKEv1 aggressive mode, 3DES / MD5 / modp1024 proposals, PFS, PSK strength, ipsec.secrets perms
-- Rule catalogue with CWE + MITRE ATT&CK mapping, severity and remediation for every finding
-- Secret masking — inline keys / PSKs never printed
-- Filesystem sweep (--root) of /etc/openvpn, /etc/wireguard, /etc/ipsec*, /etc/swanctl, ...
-- Weighted 0–100 score and A+…F grade per file
-- Export TXT / Markdown / JSON / CSV / SARIF 2.1.0
-- Built-in --demo self-test (weak vs. hardened set)
-- Full CLI mode with --min-severity / --fail-on gates
+
+- OpenVPN (.conf/.ovpn) and WireGuard (wg .conf) parsers with directive and inline-key awareness
+- Cipher/auth strength checks (weak/BF-CBC ciphers, missing tls-crypt/tls-auth, HMAC digest)
+- Certificate and key review: CA/cert/key presence, DH params, and masked embedded secrets
+- Insecure-option detection (client-to-client, duplicate-cn, no tls-version-min, 0.0.0.0 binds)
+- Key/secret file-permission and ownership checks across the config tree
+- CWE+ATT&CK mapping, offline --root trees and TXT/MD/JSON/CSV/SARIF export with CI gating
 
 ---
 
@@ -48,8 +44,13 @@ Offline OpenVPN / WireGuard / IPsec configuration auditor
 
 ## 🚀 Usage
 
+
 ```bash
-./OVpnAudit
+./OVpnAudit --scan -f sarif -o vpn.sarif
+./OVpnAudit --config /etc/openvpn/server.conf
+./OVpnAudit -r /mnt/image --fail-on high --json
+./OVpnAudit --demo
+./OVpnAudit --help
 ```
 
 ---
